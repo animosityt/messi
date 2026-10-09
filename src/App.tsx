@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 const argentina = {
   code: "ARG",
   name: "Argentina",
@@ -65,6 +67,142 @@ type Team = {
   players: Player[][]
 }
 
+// ====== Conexión con la base de datos (api.php en XAMPP) ======
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost/messi-api/api.php?partido=1"
+
+type ApiPlayer = {
+  equipo_codigo: string
+  equipo: string
+  id: number
+  numero: number | null
+  nombre: string
+  posicion: string | null
+  titular: number | boolean
+  minutos: number | null
+  goles: number | null
+  asistencias: number | null
+  tiros: number | null
+  tiros_al_arco: number | null
+  pases: number | null
+  pases_precisos: number | null
+  faltas_cometidas: number | null
+  faltas_recibidas: number | null
+  amarillas: number | null
+  rojas: number | null
+  valoracion: string | number | null
+}
+
+type ApiData = {
+  partido: {
+    fecha: string
+    estadio: string
+    goles_local: number
+    goles_visitante: number
+  }
+  jugadores: ApiPlayer[]
+}
+
+// Copia estática de la base (public/data.json) para cuando la página está publicada
+const STATIC_URL = `${import.meta.env.BASE_URL}data.json`
+
+function useMatchData() {
+  const [data, setData] = useState<ApiData | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      // En desarrollo (tu PC) se intenta primero la API de XAMPP
+      if (!import.meta.env.PROD) {
+        try {
+          const r = await fetch(API_URL)
+          if (r.ok) return setData(await r.json())
+        } catch {
+          // XAMPP apagado: se usa la copia estática
+        }
+      }
+      try {
+        const r = await fetch(STATIC_URL)
+        if (!r.ok) throw new Error("Sin datos")
+        setData(await r.json())
+      } catch {
+        setError(true)
+      }
+    }
+    load()
+  }, [])
+
+  return { data, error }
+}
+
+function Stat({ label, value }: { label: string; value: string | number | null | undefined }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-[#0a1713] p-3 text-center">
+      <p className="font-display text-3xl text-[#f2cc58]">{value ?? "–"}</p>
+      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/45">{label}</p>
+    </div>
+  )
+}
+
+function StatsModal({ player, onClose }: { player: ApiPlayer; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose()
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [onClose])
+
+  const pases =
+    player.pases != null ? `${player.pases_precisos ?? "–"}/${player.pases}` : null
+  const nota = player.valoracion != null ? Number(player.valoracion).toFixed(1) : null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Estadísticas de ${player.nombre}`}
+    >
+      <div
+        className="w-full max-w-md rounded-[1.5rem] border border-white/15 bg-[#10261f] p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
+              {player.equipo} · {player.numero != null ? `#${player.numero}` : "s/n"}
+              {player.posicion ? ` · ${player.posicion}` : ""}
+            </p>
+            <h3 className="font-display text-3xl uppercase tracking-wide">{player.nombre}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/20 text-white/70 transition hover:border-[#f2cc58] hover:text-[#f2cc58]"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <Stat label="Minutos" value={player.minutos} />
+          <Stat label="Goles" value={player.goles} />
+          <Stat label="Asistencias" value={player.asistencias} />
+          <Stat label="Remates" value={player.tiros} />
+          <Stat label="Al arco" value={player.tiros_al_arco} />
+          <Stat label="Pases" value={pases} />
+          <Stat label="Faltas hechas" value={player.faltas_cometidas} />
+          <Stat label="Faltas recib." value={player.faltas_recibidas} />
+          <Stat label="Valoración" value={nota} />
+        </div>
+        {(player.amarillas ?? 0) > 0 && (
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-[#f2cc58]">
+            Tarjeta amarilla
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function TeamMark({ team }: { team: Team }) {
   return (
     <div
@@ -77,7 +215,7 @@ function TeamMark({ team }: { team: Team }) {
   )
 }
 
-function Lineup({ team }: { team: Team }) {
+function Lineup({ team, onSelect }: { team: Team; onSelect: (code: string, number: number) => void }) {
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-white/12 bg-[#10261f] shadow-2xl shadow-black/25">
       <header className="flex items-center justify-between border-b border-white/10 bg-[#0d1815] p-5 sm:p-6">
@@ -103,9 +241,11 @@ function Lineup({ team }: { team: Team }) {
           {team.players.map((line, lineIndex) => (
             <div key={lineIndex} className="flex items-start justify-around gap-1">
               {line.map((player) => (
-                <div
+                <button
+                  type="button"
                   key={player.name}
-                  className={`flex w-20 flex-col items-center text-center sm:w-24 ${
+                  onClick={() => onSelect(team.code, player.number)}
+                  className={`flex w-20 cursor-pointer flex-col items-center text-center transition hover:-translate-y-1 sm:w-24 ${
                     player.featured ? "scale-110" : ""
                   }`}
                 >
@@ -134,7 +274,7 @@ function Lineup({ team }: { team: Team }) {
                   <span className="mt-1 text-[8px] font-bold tracking-widest text-white/50">
                     {player.role}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           ))}
@@ -145,6 +285,19 @@ function Lineup({ team }: { team: Team }) {
 }
 
 export default function App() {
+  const { data, error } = useMatchData()
+  const [selected, setSelected] = useState<ApiPlayer | null>(null)
+
+  const byKey = new Map<string, ApiPlayer>(
+    data?.jugadores.map((p): [string, ApiPlayer] => [`${p.equipo_codigo}-${p.numero}`, p]),
+  )
+  const selectPlayer = (code: string, number: number) => {
+    const found = byKey.get(`${code}-${number}`)
+    if (found) setSelected(found)
+  }
+  const bench = (code: string) =>
+    data?.jugadores.filter((p) => p.equipo_codigo === code && !p.titular && p.minutos) ?? []
+
   const scrollToLineups = () => {
     document.getElementById("lineups")?.scrollIntoView({ behavior: "smooth" })
   }
@@ -180,7 +333,7 @@ export default function App() {
             <div className="mb-7 flex items-center gap-3">
               <span className="h-px w-12 bg-[#79c9f1]" />
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#9fdcff]">
-                Buenos Aires · 07 de octubre de 2026
+                Buenos Aires · 06 de octubre de 2026
               </p>
             </div>
             <h1 className="font-display text-[clamp(5rem,15vw,12rem)] uppercase leading-[0.72] tracking-[-0.035em]">
@@ -219,14 +372,14 @@ export default function App() {
             <TeamMark team={argentina} />
           </div>
           <div className="flex items-center justify-center gap-5 border-y border-white/10 bg-[#0a1713] px-8 py-6 md:border-x md:border-y-0">
-            <span className="font-display text-6xl text-white">3</span>
+            <span className="font-display text-6xl text-white">{data?.partido.goles_local ?? 3}</span>
             <div className="text-center">
               <span className="rounded bg-[#f2cc58] px-2 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-[#081511]">
                 Final
               </span>
               <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-white/35">El Monumental</p>
             </div>
-            <span className="font-display text-6xl text-white/45">0</span>
+            <span className="font-display text-6xl text-white/45">{data?.partido.goles_visitante ?? 0}</span>
           </div>
           <div className="flex items-center justify-center gap-4 p-7 md:justify-start md:p-9">
             <TeamMark team={benin} />
@@ -289,9 +442,50 @@ export default function App() {
             </p>
           </div>
           <div className="grid gap-7 lg:grid-cols-2">
-            <Lineup team={argentina} />
-            <Lineup team={benin} />
+            <Lineup team={argentina} onSelect={selectPlayer} />
+            <Lineup team={benin} onSelect={selectPlayer} />
           </div>
+
+          {data && (
+            <p className="mt-6 text-center text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+              Tocá un jugador para ver sus estadísticas
+            </p>
+          )}
+          {error && (
+            <p className="mt-6 text-center text-sm text-white/50">
+              No se pudieron cargar las estadísticas.
+            </p>
+          )}
+
+          {data && (
+            <div className="mt-16">
+              <h3 className="mb-6 font-display text-4xl uppercase">Los que ingresaron</h3>
+              <div className="grid gap-7 lg:grid-cols-2">
+                {[argentina, benin].map((team) => (
+                  <div key={team.code}>
+                    <p
+                      className="mb-3 text-xs font-bold uppercase tracking-[0.28em]"
+                      style={{ color: team.accent }}
+                    >
+                      {team.name}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {bench(team.code).map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setSelected(p)}
+                          className="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold text-white/75 transition hover:border-[#f2cc58] hover:text-[#f2cc58]"
+                        >
+                          {p.numero != null ? `${p.numero} · ` : ""}
+                          {p.nombre} · {p.minutos}&apos;
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -308,7 +502,7 @@ export default function App() {
             10
           </span>
           <p className="mb-5 text-xs font-bold uppercase tracking-[0.34em] text-[#79c9f1]">
-            07.10.2026 · 22:54 ART
+            06.10.2026 · Estadio Monumental
           </p>
           <h2 className="font-display text-7xl uppercase leading-[0.82] sm:text-9xl lg:text-[9rem]">
             Gracias,
@@ -324,9 +518,11 @@ export default function App() {
       <footer className="border-t border-white/10 bg-[#06100d] px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/30 sm:flex-row sm:items-center sm:justify-between">
           <span>El Último Diez · Archivo del partido</span>
-          <span>Argentina 3 — 0 Benín · 07 de octubre de 2026</span>
+          <span>Argentina 3 — 0 Benín · 06 de octubre de 2026</span>
         </div>
       </footer>
+
+      {selected && <StatsModal player={selected} onClose={() => setSelected(null)} />}
     </main>
   )
 }
