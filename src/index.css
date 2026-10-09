@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+:root {
+  font-family: 'Inter', sans-serif;
+  color-scheme: dark;
+  background: #081511;
+  font-synthesis: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #081511;
+}
+
+button,
+a {
+  cursor: pointer;
+}
+
+.font-display {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+}
+
+.pitch {
+  background-color: #173d2e;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.065) 1px, transparent 1px),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 12.5%,
+      transparent 12.5%,
+      transparent 25%
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+}
+
+.pitch::before {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.pitch-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8rem;
+  height: 8rem;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.pitch-circle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+.pitch-box {
+  position: absolute;
+  left: 28%;
+  width: 44%;
+  height: 14%;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+}
+
+.pitch-box-top {
+  top: -1px;
+}
+
+.pitch-box-bottom {
+  bottom: -1px;
+}
+
+::selection {
+  color: #081511;
+  background: #f2cc58;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
