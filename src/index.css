@@ -1,106 +1,212 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Archivo:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
-:root {
-  font-family: 'Inter', sans-serif;
-  color-scheme: dark;
-  background: #081511;
-  font-synthesis: none;
+/* ====== Paleta: albiceleste + acentos de Barcelona ====== */
+@theme static {
+  --color-celeste: #74acdf;
+  --color-celeste-claro: #a9d0f0;
+  --color-hielo: #eef5fb;
+  --color-navy: #0f2747;
+  --color-navy-medio: #17335c;
+  --color-azul: #004d98;
+  --color-grana: #a50044;
+  --color-oro: #edbb00;
 }
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  :root {
+    font-family: 'Archivo', system-ui, sans-serif;
+    color-scheme: light;
+    color: #0f2747;
+    background: #ffffff;
+    font-synthesis: none;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: #ffffff;
+  }
+
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-azul);
+    outline-offset: 3px;
+  }
+
+  .on-dark :focus-visible {
+    outline-color: var(--color-oro);
+  }
+
+  ::selection {
+    color: var(--color-navy);
+    background: var(--color-oro);
+  }
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  background: #081511;
-}
+@layer components {
+  /* Tipografía de camiseta: condensada, en mayúsculas, muy pesada */
+  .font-display {
+    font-family: 'Big Shoulders Display', 'Barlow Condensed', Impact, sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
 
-button,
-a {
-  cursor: pointer;
-}
+  /* El recurso del estampado del 10: relleno navy + sombra dura desplazada.
+     Un modificador por cada fondo donde se usa. */
+  .type-sobre-celeste {
+    color: var(--color-navy);
+    text-shadow: 0.045em 0.045em 0 #ffffff;
+  }
+  .type-sobre-blanco {
+    color: var(--color-navy);
+    text-shadow: 0.045em 0.045em 0 var(--color-celeste);
+  }
+  .type-sobre-navy {
+    color: #ffffff;
+    text-shadow: 0.045em 0.045em 0 var(--color-celeste);
+  }
 
-.font-display {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-}
-
-.pitch {
-  background-color: #173d2e;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.065) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.065) 1px, transparent 1px),
-    repeating-linear-gradient(
+  /* Rayas verticales de la camiseta */
+  .rayas {
+    background-color: #ffffff;
+    background-image: repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.018) 0,
-      rgba(255, 255, 255, 0.018) 12.5%,
+      var(--color-celeste) 0,
+      var(--color-celeste) 3rem,
+      #ffffff 3rem,
+      #ffffff 6rem
+    );
+  }
+
+  .rayas-suaves {
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.16) 0,
+      rgba(255, 255, 255, 0.16) 6rem,
+      transparent 6rem,
+      transparent 12rem
+    );
+  }
+
+  /* Esquinas cortadas en diagonal (en vez de bordes redondeados) */
+  .chaflan {
+    --c: 14px;
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--c)) 0,
+      100% var(--c),
+      100% 100%,
+      var(--c) 100%,
+      0 calc(100% - var(--c))
+    );
+  }
+
+  /* Foto del hero: en celular va abajo, en escritorio entra en diagonal por la derecha */
+  .hero-foto {
+    clip-path: polygon(0 12%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  @media (min-width: 1024px) {
+    .hero-foto {
+      clip-path: polygon(calc(16% + 14px) 0, 100% 0, 100% 100%, 14px 100%);
+    }
+    .hero-oro {
+      clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+
+  /* Pizarra táctica (reemplaza al césped verde) */
+  .pizarra {
+    position: relative;
+    background-color: #0a3a75;
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055) 0,
+      rgba(255, 255, 255, 0.055) 12.5%,
       transparent 12.5%,
       transparent 25%
     );
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-}
+  }
 
-.pitch::before {
-  content: '';
-  position: absolute;
-  inset: 50% 0 auto;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.26);
-}
+  .pizarra::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.55);
+  }
 
-.pitch-circle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 8rem;
-  height: 8rem;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-}
+  .pizarra-circulo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8rem;
+    height: 8rem;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+  }
 
-.pitch-circle::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
-  transform: translate(-50%, -50%);
-}
+  .pizarra-circulo::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translate(-50%, -50%);
+  }
 
-.pitch-box {
-  position: absolute;
-  left: 28%;
-  width: 44%;
-  height: 14%;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-}
+  .pizarra-area {
+    position: absolute;
+    left: 28%;
+    width: 44%;
+    height: 14%;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+  }
 
-.pitch-box-top {
-  top: -1px;
-}
+  .pizarra-area-arriba {
+    top: 0;
+    border-top: 0;
+  }
 
-.pitch-box-bottom {
-  bottom: -1px;
-}
+  .pizarra-area-abajo {
+    bottom: 0;
+    border-bottom: 0;
+  }
 
-::selection {
-  color: #081511;
-  background: #f2cc58;
-}
+  /* Única animación de entrada de la página: el título del hero se "corta" de izquierda a derecha */
+  @keyframes corte {
+    from {
+      clip-path: inset(-0.3em 100% -0.3em -0.1em);
+    }
+    to {
+      clip-path: inset(-0.3em -0.3em -0.3em -0.1em);
+    }
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .corte-in {
+    animation: corte 0.75s cubic-bezier(0.7, 0, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .corte-in {
+      animation: none;
+    }
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
