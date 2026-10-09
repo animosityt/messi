@@ -1,0 +1,73 @@
+{
+  "partido": {
+    "fecha": "2026-10-06",
+    "estadio": "El Monumental",
+    "goles_local": 3,
+    "goles_visitante": 0
+  },
+  "jugadores": [
+    {
+      "equipo_codigo": "ARG",
+      "equipo": "Argentina",
+      "id": 1,
+      "numero": 10,
+      "nombre": "Messi",
+      "posicion": "ED",
+      "titular": 1,
+      "minutos": 90,
+      "goles": 1,
+      "asistencias": 1,
+      "tiros": 5,
+      "tiros_al_arco": 3,
+      "pases": 50,
+      "pases_precisos": 45,
+      "faltas_cometidas": 0,
+      "faltas_recibidas": 3,
+      "amarillas": 0,
+      "rojas": 0,
+      "valoracion": 9.8
+    },
+    {
+      "equipo_codigo": "ARG",
+      "equipo": "Argentina",
+      "id": 2,
+      "numero": null,
+      "nombre": "Nico Paz",
+      "posicion": "MC",
+      "titular": 0,
+      "minutos": 25,
+      "goles": 1,
+      "asistencias": 0,
+      "tiros": 2,
+      "tiros_al_arco": 1,
+      "pases": 15,
+      "pases_precisos": 12,
+      "faltas_cometidas": 1,
+      "faltas_recibidas": 1,
+      "amarillas": 0,
+      "rojas": 0,
+      "valoracion": 7.5
+    },
+    {
+      "equipo_codigo": "BEN",
+      "equipo": "Benín",
+      "id": 3,
+      "numero": 10,
+      "nombre": "Tosin Aiyegun",
+      "posicion": "DC",
+      "titular": 1,
+      "minutos": 90,
+      "goles": 0,
+      "asistencias": 0,
+      "tiros": 1,
+      "tiros_al_arco": 0,
+      "pases": 15,
+      "pases_precisos": 10,
+      "faltas_cometidas": 2,
+      "faltas_recibidas": 0,
+      "amarillas": 0,
+      "rojas": 0,
+      "valoracion": 6.0
+    }
+  ]
+}
